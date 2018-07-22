@@ -1,0 +1,13 @@
+name: gifstruct
+version: 0.1.0
+
+authors:
+  - Raphael Reitzig <reitzig@verrech.net>
+
+targets:
+  gifstruct:
+    main: src/gifstruct.cr
+
+crystal: 0.25.1
+
+license: MIT
