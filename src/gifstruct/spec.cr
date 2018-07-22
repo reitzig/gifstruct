@@ -6,9 +6,9 @@ require "json"
 module Gifstruct
     module SpecPart
         @@default : Hash(Symbol, UInt64) = {
-            :delay => 40_u64,
-            :loop  => 0_u64,
-            :repeat => 1_u64
+            :delay  => 40_u64,
+            :loop   =>  0_u64,
+            :repeat =>  1_u64
         }
 
         def commands(tmp_dir : String) : Array(String)
@@ -38,7 +38,7 @@ module Gifstruct
         def commands(tmp_dir : String) : Array(String)
             sequence = images.map { |is| is.options }
                              .flatten
-                             .map { |f| "\"#{tmp_dir}\"/#{f}" }
+                             .map { |f| "\"#{tmp_dir}/#{f}\"" }
                              .join(" ")
             ["convert #{parameters.options.join(" ")} #{sequence} \"#{name}.gif\""]
         end
@@ -94,7 +94,7 @@ module Gifstruct
         end
 
         def options : Array(String)
-            Array.new(repeat, "\"#{file}\"")
+            Array.new(repeat, file)
         end
     end
 

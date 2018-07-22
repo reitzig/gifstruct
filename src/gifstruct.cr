@@ -1,52 +1,44 @@
 require "./gifstruct/*"
-require "json"
-require "file_utils"
-require "tempfile"
-require "progress"
+require "option_parser"
 
-# TODO: Write documentation for `Gifstruct`
 module Gifstruct
-  # TODO: Put your code here
+  class_property debug = false
+  class_property show  = false
+  class_property quiet = false
 end
 
-if ARGV.size < 1
-  puts "Pass the gifspec!"
-  Process.exit
-end
+parser = OptionParser.new do |p|
+  p.banner = "Usage: gifstruct [options] FILE"
 
-if !File.exists?(ARGV[0])
-  puts "File '#{ARGV[0]}' does not exist!"
-  Process.exit
-end
-
-# Load and parse gifspec
-puts "Loading GIF specification ..."
-json = JSON.parse(File.read(ARGV[0]))
-spec = Gifstruct::GifSpec.from_json(json)
-
-tmp = Tempfile.tempname
-FileUtils.mkdir_p(tmp) 
-
-# Convert images into temp folder
-puts "Processing images ..."
-bar = ProgressBar.new
-bar.width = 40
-bar.total = spec.images.size
-spec.images.each { |image|
-  # TODO: parallelize this loop once Crystal can do that
-  image.commands(tmp).each { |c| 
-    `#{c}`
+  p.on("-d", "--debug", "Show detailed output.") { 
+    Gifstruct.debug = true && !Gifstruct.quiet # if quiet is set, ignore debug
   }
-  bar.inc
-}
-#bar.done
+  p.on("-s", "--show", "Show the ImageMagick commands, but do not execute them.") { 
+    Gifstruct.show = true
+  }
+  p.on("-q", "--quiet", "Suppress all output. Takes precedence over -d.") { 
+    Gifstruct.quiet = true
+    Gifstruct.debug = false
+  }
 
-# Create GIF
-puts "Assembling GIF ... "
-spec.commands(tmp).each { |c|
-  `#{c}`
-}
+  p.invalid_option do |flag|
+    STDERR.puts "ERROR: #{flag} is not a valid option."
+    STDERR.puts p
+    exit(1)
+  end
+end
 
-# Clean up
-FileUtils.rm_rf(tmp)
+parser.parse! # Consumes ARGV as long as it matches options.
 
+unless spec_file = ARGV.pop?
+  STDERR.puts "ERROR: No specification file given."
+  STDERR.puts parser
+  exit(1)
+end
+
+unless File.exists?(spec_file)
+  puts "ERROR: File '#{spec_file}' does not exist!"
+  exit(1)
+end
+
+Gifstruct.do(spec_file)

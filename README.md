@@ -1,6 +1,6 @@
 # gifstruct
 
-Creates GIFs based on a written recipe. 
+Creates GIFs based on a written specification. 
 
 ## Installation
 
@@ -24,4 +24,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [your-github-user](https://gitlab.com/reitzig) Raphael Reitzig - creator, maintainer
+- [Raphael Reitzig](https://gitlab.com/reitzig) - creator, maintainer
