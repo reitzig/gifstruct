@@ -8,6 +8,10 @@ targets:
   gifstruct:
     main: src/gifstruct.cr
 
+dependencies:
+  progress:
+    github: askn/progress
+
 crystal: 0.25.1
 
 license: MIT
