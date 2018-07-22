@@ -19,55 +19,24 @@ if !File.exists?(ARGV[0])
 end
 
 # Load and parse gifspec
-
-spec = JSON.parse(File.read(ARGV[0]))
-
-if spec.nil? || spec == ""
-  puts "No JSON in '#{ARGV[0]}'!"
-  Process.exit
-end
-
-# Assemble image preprocessing parameters
-
-# wxh{+-}x{+-}y
-crop=""
-if !spec["crop"].nil?
-    crop = spec["crop"]["width"].to_s + "x" + 
-          spec["crop"]["height"].to_s +
-          "+" + spec["crop"]["x"].to_s +
-          "+" + spec["crop"]["y"].to_s
-    crop = "-crop #{crop}"
-end
-
-# wxh
-resize = spec["size"]["width"].to_s + "x" + 
-        spec["size"]["height"].to_s
-      
-# Preprocess images
-      
-sequence = spec["sequence"].as_a.map { |e|
-  e.as_h
-}
+json = JSON.parse(File.read(ARGV[0]))
+spec = Gifstruct::GifSpec.from_json(json)
 
 tmp = Tempfile.tempname
 FileUtils.mkdir_p(tmp) 
-sequence.map { |e| 
-  e["file"] 
-}.each { |file|
-  `convert "#{file}" #{crop} -resize "#{resize}" "#{tmp}/#{file}"`
+
+# Convert images into temp folder
+spec.images.each { |image|
+  image.commands(tmp).each { |c| 
+    `#{c}`
+  }
 }
 
-# Assemble image sequence
-
-sequence = sequence.map { |e|
-  Array.new(e["repeat"].as_i, e["file"])
-}.flatten.map { |f|
-  "\"#{tmp}/#{f}\""
-}.join(" ")
-
 # Create GIF
+spec.commands(tmp).each { |c|
+  `#{c}`
+}
 
-`convert -delay #{spec["delay"]}x100 #{sequence} -loop #{spec["loop"]} "#{ARGV[0].sub(/\.[^.]+$/, ".gif")}"`
-
+# Clean up
 FileUtils.rm_rf(tmp)
 
