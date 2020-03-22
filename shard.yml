@@ -12,6 +12,6 @@ dependencies:
   progress:
     github: askn/progress
 
-crystal: 0.25.1
+crystal: 0.28.0
 
 license: MIT

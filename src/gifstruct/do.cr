@@ -1,7 +1,6 @@
 #require "./*"
 require "json"
 require "file_utils"
-require "tempfile"
 require "option_parser"
 
 require "progress"
@@ -14,7 +13,7 @@ module Gifstruct
         json = JSON.parse(File.read(spec_file))
         spec = GifSpec.from_json(json)
 
-        tmp = Tempfile.tempname
+        tmp = File.tempname
         FileUtils.mkdir_p(tmp) 
 
         # Convert images into temp folder
